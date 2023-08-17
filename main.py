@@ -5,10 +5,11 @@ from typing import List
 import mediapipe as mp
 import cv2
 
-IMAGE_EXTENSIONS = ['png', 'jpg']
-DEFAULT_BASE_DIR = 'images'
+# IMAGE_EXTENSIONS = ['png', 'jpg']
+IMAGE_EXTENSIONS = ['mp4']
+DEFAULT_BASE_DIR = 'videos'
 POSE_INIT = mp.solutions.pose.Pose(
-    static_image_mode=True, # change to False of was video stream
+    static_image_mode=False,  # change to False of was video stream
     model_complexity=1,
     smooth_landmarks=True,
     min_detection_confidence=0.5,
@@ -18,21 +19,19 @@ POSE_INIT = mp.solutions.pose.Pose(
 DRAWING = mp.solutions.drawing_utils
 
 
-def detect_human_pose_from_image(image_path: str):
-    pose = POSE_INIT
-    img = cv2.imread(image_path, 1)
-    imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+def detect_pose(frame,pose):
+    frame_rgb = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+    result = pose.process(frame_rgb)  # start detecting the keypoints
+    return result
 
-    result = pose.process(imgRGB) # start detecting the keypoints
-
-    if result.pose_landmarks:
+def draw_pose_on_frame(frame, detected_frame,  drawing):
+    if detected_frame.pose_landmarks:
         DRAWING.draw_landmarks(
-            image=img,
-            landmark_list=result.pose_landmarks,
+            image=frame,
+            landmark_list=detected_frame.pose_landmarks,
             connections=mp.solutions.pose.POSE_CONNECTIONS,
             landmark_drawing_spec=DRAWING.DrawingSpec(
-                color=(250, 250, 250)
-                ,
+                color=(250, 250, 250),
                 thickness=7,
                 circle_radius=4
             ),
@@ -42,12 +41,24 @@ def detect_human_pose_from_image(image_path: str):
                 circle_radius=3,
             )
         )
-    print(result.pose_landmarks)
+        print(detected_frame.pose_landmarks)
 
-    filename = Path(image_path).stem
-    output_filename = Path('results') / f"{filename}_pose_detection_res.png"
-    cv2.imwrite(filename=str(output_filename), img=img)
+def detect_human_pose_from_video(video_path: str):
+    pose = POSE_INIT
+    cap = cv2.VideoCapture(video_path)
 
+    while cap.isOpened():
+        ret,frame = cap.read()
+        if not ret:
+            break
+        # frame_to_RGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        result = detect_pose(frame,POSE_INIT)
+        draw_pose_on_frame(frame,result,DRAWING)
+        cv2.imshow('Video After detecting the pose', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    cap.release()
+    cv2.destroyAllWindows()
 
 def main(argv=None) -> None:
     """
@@ -75,10 +86,10 @@ def main(argv=None) -> None:
         #             if entry.is_file() and entry.name.lower().split('.')[-1] in IMAGE_EXTENSIONS:
 
         # for image in file_list:
-        for image in directory_path.iterdir():
-            if image.is_file() and image.name.lower().split('.')[-1] in IMAGE_EXTENSIONS:
-                image_path = str(image)
-                detect_human_pose_from_image(image_path)
+        for video in directory_path.iterdir():
+            if video.is_file() and video.name.lower().split('.')[-1] in IMAGE_EXTENSIONS:
+                video_path = str(video)
+                detect_human_pose_from_video(video_path)
 
 
 if __name__ == '__main__':

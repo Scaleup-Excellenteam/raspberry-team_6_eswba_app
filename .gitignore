@@ -1,3 +1,5 @@
 .idea
-.venv
-.results
+/results
+/videos
+/images
+/venv
