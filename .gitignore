@@ -3,3 +3,5 @@
 /videos
 /images
 /venv
+/__pycache__
+```
