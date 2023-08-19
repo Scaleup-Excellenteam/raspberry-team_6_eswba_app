@@ -43,6 +43,16 @@ def detect_human_pose_from_video(video_path: str):
         print(angles_to_calculate)
         # if np all(angles_to_calculate in landmarks_list_id):
         print("name: ", part_name + ", degree:", pose_detector.get_angle(image, *angles_to_calculate))
+    # for i in range(0, len(angles_to_get)):
+    #     (landmark_1, landmark_2, landmark_3) = angles_to_get[i][1]
+    #     if landmark_1 and landmark_2 and landmark_3 in landmarks_list:
+    #         print(landmarks_list[landmark_1])
+    #         print(landmarks_list[landmark_2])
+    #         print(landmarks_list[landmark_3])
+    #         # Get angle between landmarks
+    #         print(angles_to_get[i][0])
+    #         # Get angles between landmarks
+    #         print(landmarks_list)
 
     # Get angles between landmarks
 

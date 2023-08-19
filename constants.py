@@ -21,7 +21,6 @@ POSE = mp.solutions.pose.Pose(
 )
 EXIT_KEY = ord('q')
 
-
 # class Color(Enum):
 #     RED = (0, 0, 255)
 #     GREEN = (0, 255, 0)
@@ -53,16 +52,15 @@ CONNECTION_DRAWING_SPEC = DRAWING.DrawingSpec(
 # Degrees
 ONE_EIGHTY_DEGREES = 180.0
 THREE_SIXTY_DEGREES = 360.0
+POINTS_OFFSET = 15
 
 BODY_PARTS: dict[str, tuple[int, int, int]] = {
-        'left_shoulder': (11, 13, 15),
-        'right_shoulder': (12, 14, 16),
-        'left_elbow': (13, 15, 17),
-        'right_elbow': (14, 16, 18),
-        'left_hip': (23, 25, 27),
-        'right_hip': (24, 26, 28),
-        'left_knee': (25, 27, 29),
-        'right_knee': (26, 28, 30),
-        'left_ankle': (27, 29, 31),
-        'right_ankle': (28, 30, 32),
-    }
+    'left elbow': (
+        MP_POSE.PoseLandmark.LEFT_SHOULDER, MP_POSE.PoseLandmark.LEFT_ELBOW, MP_POSE.PoseLandmark.LEFT_WRIST),
+    'right elbow': (
+        MP_POSE.PoseLandmark.RIGHT_SHOULDER, MP_POSE.PoseLandmark.RIGHT_ELBOW, MP_POSE.PoseLandmark.RIGHT_WRIST),
+    'left hip': (MP_POSE.PoseLandmark.LEFT_SHOULDER, MP_POSE.PoseLandmark.LEFT_HIP, MP_POSE.PoseLandmark.LEFT_KNEE),
+    'right hip': (MP_POSE.PoseLandmark.RIGHT_SHOULDER, MP_POSE.PoseLandmark.RIGHT_HIP, MP_POSE.PoseLandmark.RIGHT_KNEE),
+    'left knee': (MP_POSE.PoseLandmark.LEFT_HIP, MP_POSE.PoseLandmark.LEFT_KNEE, MP_POSE.PoseLandmark.LEFT_ANKLE),
+    'right knee': (MP_POSE.PoseLandmark.RIGHT_HIP, MP_POSE.PoseLandmark.RIGHT_KNEE, MP_POSE.PoseLandmark.RIGHT_ANKLE)
+}

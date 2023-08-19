@@ -87,6 +87,17 @@ class PoseDetector:
         return self.landmark_list
 
     @staticmethod
+    def get_180_degree_angle(angle: float) -> float:
+
+        if angle < 0:
+            angle = THREE_SIXTY_DEGREES + angle
+
+        if angle > ONE_EIGHTY_DEGREES:
+            angle = THREE_SIXTY_DEGREES - angle
+
+        return angle
+
+    @staticmethod
     def calculate_angle_between_points(a: POINT_COORDINATES, b: POINT_COORDINATES, c: POINT_COORDINATES) -> float:
         # Split the points into x and y coordinates
         [ax, ay], [bx, by], [cx, cy] = a[1:], b[1:], c[1:]
@@ -97,13 +108,7 @@ class PoseDetector:
         # Get angle in degrees
         angle = math.degrees(radians)
         # Set angle in range 0-360
-        if angle > ONE_EIGHTY_DEGREES:
-            angle = THREE_SIXTY_DEGREES - angle
-
-        elif angle < 0:
-            angle = THREE_SIXTY_DEGREES + angle
-
-        return angle
+        return PoseDetector.get_180_degree_angle(angle)
 
     def get_angle(self, image: np.ndarray, point_a: int, point_b: int, point_c: int, is_draw: bool = True):
         """
@@ -133,8 +138,8 @@ class PoseDetector:
                 draw_circle(image, point, 5, red_color, cv2.FILLED)
                 draw_circle(image, point, 15, white_color, 2)
 
-            offset = 50
-            cv2.putText(image, str(int(angle)), (point_b[0] - offset, point_b[1] - offset), cv2.FONT_HERSHEY_PLAIN, 2,
+            cv2.putText(image, str(int(angle)), (point_b[0] - POINTS_OFFSET, point_b[1] - POINTS_OFFSET),
+                        cv2.FONT_HERSHEY_PLAIN, 2,
                         red_color, 2)
 
         return angle
