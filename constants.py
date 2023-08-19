@@ -53,3 +53,16 @@ CONNECTION_DRAWING_SPEC = DRAWING.DrawingSpec(
 # Degrees
 ONE_EIGHTY_DEGREES = 180.0
 THREE_SIXTY_DEGREES = 360.0
+
+BODY_PARTS: dict[str, tuple[int, int, int]] = {
+        'left_shoulder': (11, 13, 15),
+        'right_shoulder': (12, 14, 16),
+        'left_elbow': (13, 15, 17),
+        'right_elbow': (14, 16, 18),
+        'left_hip': (23, 25, 27),
+        'right_hip': (24, 26, 28),
+        'left_knee': (25, 27, 29),
+        'right_knee': (26, 28, 30),
+        'left_ankle': (27, 29, 31),
+        'right_ankle': (28, 30, 32),
+    }

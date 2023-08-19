@@ -1,10 +1,14 @@
 import argparse
 from pathlib import Path
 import cv2
+import numpy as np
+
 from constants import *
 import poseDetector
 
 pose_detector = poseDetector.PoseDetector()
+
+
 def detect_pose(frame, pose):
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = pose.process(frame_rgb)  # start detecting the keypoints
@@ -24,21 +28,40 @@ def draw_pose_on_frame(frame, detected_frame, drawing):
 
 
 def detect_human_pose_from_video(video_path: str):
-    cap = cv2.VideoCapture(video_path)
+    # cap = cv2.VideoCapture(video_path)
+    image = cv2.imread('images/img.png')
+    pose_detector.detect_pose(image)
+    landmarks_list = pose_detector.get_position(image)
+    # landmarks_list_id = [landmark[0] for landmark in landmarks_list]
+    landmarks_list_id = np.array(landmarks_list)[:, 0]
+    # print(landmarks_list)
 
-    while cap.isOpened():
-        success, frame = cap.read()
-        if not success:
-            break
-        # frame_to_RGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # result = detect_pose(frame, POSE_INIT)
-        pose_detector.detect_pose(frame)
-        # draw_pose_on_frame(frame, result, DRAWING)
-        cv2.imshow('Video After detecting the pose', frame)
-        if cv2.waitKey(1) & 0xFF == EXIT_KEY:
-            break
-    cap.release()
-    cv2.destroyAllWindows()
+    # print("left_shoulder", angles_to_get['left_shoulder'])
+
+    for part_name in BODY_PARTS.keys():
+        angles_to_calculate = BODY_PARTS[part_name]
+        print(angles_to_calculate)
+        # if np all(angles_to_calculate in landmarks_list_id):
+        print("name: ", part_name + ", degree:", pose_detector.get_angle(image, *angles_to_calculate))
+
+    # Get angles between landmarks
+
+    cv2.imshow('Video After detecting the pose', image)
+    cv2.waitKey(0)
+
+    # while cap.isOpened():
+    #     success, frame = cap.read()
+    #     if not success:
+    #         break
+    #     # frame_to_RGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    #     # result = detect_pose(frame, POSE_INIT)
+    #     pose_detector.detect_pose(frame)
+    #     # draw_pose_on_frame(frame, result, DRAWING)
+    #     cv2.imshow('Video After detecting the pose', frame)
+    #     if cv2.waitKey(1) & 0xFF == EXIT_KEY:
+    #         break
+    # cap.release()
+    # cv2.destroyAllWindows()
 
 
 def main(argv=None) -> None:
@@ -69,4 +92,3 @@ def main(argv=None) -> None:
 
 if __name__ == '__main__':
     main()
-
