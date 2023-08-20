@@ -5,9 +5,12 @@ import mediapipe as mp
 MIN_DETECTION_CONFIDENCE = 0.5
 MIN_TRACKING_CONFIDENCE = 0.5
 OUTPUT_DIR_NAME = 'results'
-# IMAGE_EXTENSIONS = ['png', 'jpg']
-IMAGE_EXTENSIONS = ['mp4']
+IMAGE_EXTENSIONS = ['png', 'jpg']
+VIDEO_EXTENSIONS = ['mp4']
 DEFAULT_BASE_DIR = 'videos'
+BAR_SCALES = (300, 100)
+BAR_SIZE = (150, BAR_SCALES[0])
+EMPTY_CAMERA_FRAME = 'Empty camera frame'
 
 VIDEO_PATH = 'videos/squat.mp4'
 
@@ -48,7 +51,7 @@ CONNECTION_DRAWING_SPEC = DRAWING.DrawingSpec(
     thickness=11,
     circle_radius=3,
 )
-
+FPS = 30
 # Degrees
 ONE_EIGHTY_DEGREES = 180.0
 THREE_SIXTY_DEGREES = 360.0
@@ -64,3 +67,10 @@ BODY_PARTS: dict[str, tuple[int, int, int]] = {
     'left knee': (MP_POSE.PoseLandmark.LEFT_HIP, MP_POSE.PoseLandmark.LEFT_KNEE, MP_POSE.PoseLandmark.LEFT_ANKLE),
     'right knee': (MP_POSE.PoseLandmark.RIGHT_HIP, MP_POSE.PoseLandmark.RIGHT_KNEE, MP_POSE.PoseLandmark.RIGHT_ANKLE)
 }
+
+INNER_CIRCLE_RADIUS = 5
+OUTER_CIRCLE_RADIUS = 15
+
+LANDMARK_VARIABLES = list[int, int, int]
+POINT_COORDINATES = list[int, int]
+

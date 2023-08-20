@@ -1,4 +1,6 @@
 import argparse
+import os
+import sys
 from pathlib import Path
 import cv2
 import numpy as np
@@ -9,69 +11,70 @@ import poseDetector
 pose_detector = poseDetector.PoseDetector()
 
 
-def detect_pose(frame, pose):
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    result = pose.process(frame_rgb)  # start detecting the keypoints
-    return result
+# todo: add logging for better debugging
 
 
-def draw_pose_on_frame(frame, detected_frame, drawing):
-    if detected_frame.pose_landmarks:
-        DRAWING.draw_landmarks(
-            image=frame,
-            landmark_list=detected_frame.pose_landmarks,
-            connections=mp.solutions.pose.POSE_CONNECTIONS,
-            landmark_drawing_spec=LANDMARK_DRAWING_SPEC,
-            connection_drawing_spec=CONNECTION_DRAWING_SPEC
-        )
-        # print(detected_frame.pose_landmarks)
+def check_if_path_exists(path: str) -> None:
+    """
+    Check if the path exists
+    :param path: to check
+    :throws: FileNotFoundError if the path doesn't exist
+    """
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Path {path} doesn't exist")
 
 
-def detect_human_pose_from_video(video_path: str):
-    # cap = cv2.VideoCapture(video_path)
-    image = cv2.imread('images/img.png')
-    pose_detector.detect_pose(image)
-    landmarks_list = pose_detector.get_position(image)
-    # landmarks_list_id = [landmark[0] for landmark in landmarks_list]
-    landmarks_list_id = np.array(landmarks_list)[:, 0]
-    # print(landmarks_list)
+def image_process(image: np.ndarray) -> None:
+    pose_detector.detect_pose(image, is_draw=False)
+    landmarks_list = pose_detector.get_position(image, is_draw=False)
+    if landmarks_list:
+        for part_name in BODY_PARTS.keys():
+            try:
+                angles_to_calculate = BODY_PARTS[part_name]
+                print("angles_to_calculate: ", angles_to_calculate)
+                # print(angles_to_calculate)
+                angle = pose_detector.get_angle(image, *angles_to_calculate)
 
-    # print("left_shoulder", angles_to_get['left_shoulder'])
+                print("get_angle: ", angle)
+                # print("name: ", part_name + ", angle:", angle)
+                percentage = np.interp(angle, (210, 310), (0, 100))
+                print("percentage: ", percentage)
+                # cv2.putText(image, str(int(percentage)) + "%", 10, 50, cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+            except IndexError:
+                continue
+    cv2.imshow('After detecting the pose', image)
 
-    for part_name in BODY_PARTS.keys():
-        angles_to_calculate = BODY_PARTS[part_name]
-        print(angles_to_calculate)
-        # if np all(angles_to_calculate in landmarks_list_id):
-        print("name: ", part_name + ", degree:", pose_detector.get_angle(image, *angles_to_calculate))
-    # for i in range(0, len(angles_to_get)):
-    #     (landmark_1, landmark_2, landmark_3) = angles_to_get[i][1]
-    #     if landmark_1 and landmark_2 and landmark_3 in landmarks_list:
-    #         print(landmarks_list[landmark_1])
-    #         print(landmarks_list[landmark_2])
-    #         print(landmarks_list[landmark_3])
-    #         # Get angle between landmarks
-    #         print(angles_to_get[i][0])
-    #         # Get angles between landmarks
-    #         print(landmarks_list)
 
-    # Get angles between landmarks
+def detect_human_pose_from_video(video_path: str) -> None:
+    """
+    Detect human pose from video or image according to the extension of the file
+    :param video_path: path to the video or image
+    :return: None
+    """
+    try:
+        check_if_path_exists(video_path)
+    except FileNotFoundError as e:
+        sys.stderr.write(f"{e}\n")
+        return
 
-    cv2.imshow('Video After detecting the pose', image)
-    cv2.waitKey(0)
+    if video_path.split('.')[-1] in IMAGE_EXTENSIONS:
+        image = cv2.imread(video_path)
+        image_process(image)
+        cv2.waitKey(0)
+        return
 
-    # while cap.isOpened():
-    #     success, frame = cap.read()
-    #     if not success:
-    #         break
-    #     # frame_to_RGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    #     # result = detect_pose(frame, POSE_INIT)
-    #     pose_detector.detect_pose(frame)
-    #     # draw_pose_on_frame(frame, result, DRAWING)
-    #     cv2.imshow('Video After detecting the pose', frame)
-    #     if cv2.waitKey(1) & 0xFF == EXIT_KEY:
-    #         break
-    # cap.release()
-    # cv2.destroyAllWindows()
+    cap = cv2.VideoCapture(video_path)
+    while cap.isOpened():
+        success, image = cap.read()
+        if not success:
+            print("Ignoring empty camera frame.")
+            break
+        image_process(image)
+        if cv2.waitKey(1) & 0xFF == EXIT_KEY:
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
 
 
 def main(argv=None) -> None:
@@ -93,12 +96,14 @@ def main(argv=None) -> None:
     if directory_path.exists():
         results_dir = Path(OUTPUT_DIR_NAME)
         results_dir.mkdir(exist_ok=True)
-
+        # extend extensions to include all cases of VIDEO_EXTENSIONS and IMAGE_EXTENSIONS
+        extention = list(set(VIDEO_EXTENSIONS + IMAGE_EXTENSIONS))
         for video in directory_path.iterdir():
-            if video.is_file() and video.name.lower().split('.')[-1] in IMAGE_EXTENSIONS:
+            if video.is_file() and video.name.lower().split('.')[-1] in extention:
                 video_path = str(video)
                 detect_human_pose_from_video(video_path)
 
 
 if __name__ == '__main__':
     main()
+    # detect_human_pose_from_video('videos/curl2.mp4')  # test
