@@ -179,7 +179,7 @@ def main():
     cap = cv2.VideoCapture('videos/curl.mp4')
     detector = PoseDetector()
     previous_time = 0
-    # get 30 frames per second exactly
+    # todo: get 30 frames per second more accurately
     cap.set(cv2.CAP_PROP_FPS, FPS)
 
     while cap.isOpened():
