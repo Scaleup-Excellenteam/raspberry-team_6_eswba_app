@@ -15,19 +15,7 @@ EMPTY_CAMERA_FRAME = 'Empty camera frame'
 VIDEO_PATH = 'videos/squat.mp4'
 
 MP_POSE = mp.solutions.pose
-POSE = mp.solutions.pose.Pose(
-    static_image_mode=False,  # change to False of was video stream
-    model_complexity=1,
-    smooth_landmarks=True,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5
-)
 EXIT_KEY = ord('q')
-
-# class Color(Enum):
-#     RED = (0, 0, 255)
-#     GREEN = (0, 255, 0)
-#     WHITE = (255, 255, 255)
 
 
 COLORS: dict[str, tuple[int, int, int]] = {
@@ -73,4 +61,3 @@ OUTER_CIRCLE_RADIUS = 15
 
 LANDMARK_VARIABLES = list[int, int, int]
 POINT_COORDINATES = list[int, int]
-
