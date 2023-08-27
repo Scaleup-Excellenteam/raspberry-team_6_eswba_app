@@ -7,10 +7,10 @@ MIN_TRACKING_CONFIDENCE = 0.5
 OUTPUT_DIR_NAME = 'results'
 IMAGE_EXTENSIONS = ['png', 'jpg']
 VIDEO_EXTENSIONS = ['mp4']
-DEFAULT_BASE_DIR = 'videos'
+DEFAULT_BASE_DIR = 'underwater'
 BAR_SCALES = (300, 100)
 BAR_SIZE = (150, BAR_SCALES[0])
-EMPTY_CAMERA_FRAME = 'Empty camera frame'
+EMPTY_CAMERA_FRAME = 'Ignoring empty camera frame'
 
 VIDEO_PATH = 'videos/squat.mp4'
 
@@ -61,3 +61,31 @@ OUTER_CIRCLE_RADIUS = 15
 
 LANDMARK_VARIABLES = list[int, int, int]
 POINT_COORDINATES = list[int, int]
+
+# pose landmarks
+POSE_LANDMARKS = MP_POSE.PoseLandmark
+LEFT_HIP = POSE_LANDMARKS.LEFT_HIP.value
+LEFT_KNEE = POSE_LANDMARKS.LEFT_KNEE.value
+LEFT_ANKLE = POSE_LANDMARKS.LEFT_ANKLE.value
+RIGHT_HIP = POSE_LANDMARKS.RIGHT_HIP.value
+RIGHT_KNEE = POSE_LANDMARKS.RIGHT_KNEE.value
+RIGHT_ANKLE = POSE_LANDMARKS.RIGHT_ANKLE.value
+LEFT_SHOULDER = POSE_LANDMARKS.LEFT_SHOULDER.value
+# squat correct angles
+SQUAT_ANGLES = {
+    'left-knee': {
+        'posture_angle': 160,
+        'down_angle': 80,
+        'up_angle': 160
+    },
+    'right-knee': {
+        'posture_angle': 160,
+        'down_angle': 80,
+        'up_angle': 160
+    },
+    'lef_hip': {
+        'posture_angle': 170,
+        'down_angle': 75,
+        'up_angle': 160
+    }
+}

@@ -11,9 +11,6 @@ import poseDetector
 pose_detector = poseDetector.PoseDetector()
 
 
-# todo: add logging for better debugging
-
-
 def check_if_path_exists(path: str) -> None:
     """
     Check if the path exists
@@ -25,24 +22,19 @@ def check_if_path_exists(path: str) -> None:
 
 
 def image_process(image: np.ndarray) -> None:
-    pose_detector.detect_pose(image, is_draw=False)
-    landmarks_list = pose_detector.get_position(image, is_draw=False)
-    if landmarks_list:
-        for part_name in BODY_PARTS.keys():
-            try:
+    result = pose_detector.detect_pose(image, is_draw=False)
+    landmark_list = pose_detector.get_position(image, result.pose_landmarks, is_draw=False, landmark_list=[])
+    for part_name in BODY_PARTS.keys():
+        try:
+            if len(landmark_list) != 0:
                 angles_to_calculate = BODY_PARTS[part_name]
-                print("angles_to_calculate: ", angles_to_calculate)
-                # print(angles_to_calculate)
-                angle = pose_detector.get_angle(image, *angles_to_calculate)
+                angle = pose_detector.get_angle(image, *angles_to_calculate, landmark_list)
+                # print(part_name, angle)
 
-                print("get_angle: ", angle)
-                # print("name: ", part_name + ", angle:", angle)
-                percentage = np.interp(angle, (210, 310), (0, 100))
-                print("percentage: ", percentage)
-                # cv2.putText(image, str(int(percentage)) + "%", 10, 50, cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-            except IndexError:
-                continue
-    cv2.imshow('After detecting the pose', image)
+        except IndexError:
+            continue
+
+    cv2.imshow('After detecting the pose underwater', image)
 
 
 def detect_human_pose_from_video(video_path: str) -> None:
@@ -106,4 +98,3 @@ def main(argv=None) -> None:
 
 if __name__ == '__main__':
     main()
-    # detect_human_pose_from_video('videos/curl2.mp4')  # test

@@ -33,22 +33,6 @@ def process_video(video_path: str, images_queue: queue.Queue) -> None:
         correct_reps, direction, previous_time = process_frame(image, detector, landmark_list, previous_time,
                                                                correct_reps, direction, is_display_feedback=False)
 
-        # detector.detect_pose(image, is_draw=False)
-        # result = detector.detect_pose(image, is_draw=False)
-        # landmark_list = detector.get_position(image,result, is_draw=False,landmark_list=landmark_list)
-        #
-        # if len(landmark_list) != 0:
-        #     # test left knee
-        #     angle = detector.get_angle(image, 11, 13, 15,landmark_list)
-        #     percentage = np.interp(angle, (210, 310), (0, 100))
-        #     cv2.putText(image, str(int(percentage)) + "%", (10, 50), cv2.FONT_HERSHEY_PLAIN, 2, COLORS['red'], 2)
-        #     # PoseDetector.draw_bar(image, angle=angle, percentage=percentage)
-        #     # print(video_path, " pre:", percentage)
-        #     display_feedback(image, percentage, correct_reps, direction)
-        #
-        # current_time = time.time()
-        # fps = 1 / (current_time - previous_time)
-
         # previous_time = current_time
         # cv2.putText(image, f'FPS: {int(fps)}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, COLORS['red'], 2)
         # width, height = 800, 800
@@ -86,7 +70,7 @@ class VideoDisplayThread(threading.Thread):
 
 def main():
     correct_video_path = 'videos/curl.mp4'
-    incorrect_video_path = 'videos/curl.mp4'
+    incorrect_video_path = 'videos/curl2.mp4'
 
     correct_images_queue = queue.Queue()
     incorrect_images_queue = queue.Queue()

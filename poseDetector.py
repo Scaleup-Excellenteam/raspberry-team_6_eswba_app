@@ -112,6 +112,8 @@ class PoseDetector:
         # normalized_angle = angle % THREE_SIXTY_DEGREES
         if angle < 0:
             angle += THREE_SIXTY_DEGREES
+        if angle > ONE_EIGHTY_DEGREES:
+            angle = THREE_SIXTY_DEGREES - angle
         return angle
 
     def get_angle(self, image: np.ndarray, point_a: int, point_b: int, point_c: int, landmark_list,
@@ -174,91 +176,90 @@ class PoseDetector:
                     2)
 
 
-def check_progress(percentage: float, correct_reps: float, direction: int) -> tuple[float, int]:
-    if percentage == 100:
-        if direction == 0:
-            correct_reps += 0.5
-            direction = 1
-    elif percentage == 0:
-        if direction == 1:
-            correct_reps += 0.5
-            direction = 0
-    return correct_reps, direction
+# def check_progress(percentage: float, correct_reps: float, direction: int) -> tuple[float, int]:
+#     if percentage == 100:
+#         if direction == 0:
+#             correct_reps += 0.5
+#             direction = 1
+#     elif percentage == 0:
+#         if direction == 1:
+#             correct_reps += 0.5
+#             direction = 0
+#     return correct_reps, direction
+#
+#
+# def display_feedback(image: np.ndarray, percentage: float, correct_reps: float, direction: int) -> tuple[float, int]:
+#     correct_reps, direction = check_progress(percentage, correct_reps, direction)
+#     # give feedback
+#     cv2.putText(image, f'{int(correct_reps)}', (10, 100), cv2.FONT_HERSHEY_PLAIN, 2, COLORS['green'], 2)
+#     #     give guide fidback to correct the pose
+#     if percentage == 0:
+#         cv2.putText(image, 'Move your arm up', (10, 100), cv2.FONT_HERSHEY_PLAIN, 2, COLORS['red'], 2)
+#     elif percentage == 100:
+#         cv2.putText(image, 'Move your arm down', (10, 100), cv2.FONT_HERSHEY_PLAIN, 2, COLORS['red'], 2)
+#
+#     return correct_reps, direction
+#
+#
+# def process_frame(image: np.ndarray, detector: PoseDetector, landmark_list: list[LANDMARK_VARIABLES],
+#                   previous_time: float, correct_reps: float
+#                   , direction: int, is_display_feedback=True) -> tuple[float, int, float]:
+#     result = detector.detect_pose(image, is_draw=False)
+#     landmark_list = detector.get_position(image, result.pose_landmarks, is_draw=False, landmark_list=landmark_list)
+#
+#     if len(landmark_list) != 0:
+#         # test left knee
+#         angle = detector.get_angle(image, 11, 13, 15, landmark_list)
+#         percentage = np.interp(angle, (210, 310), (0, 100))
+#         PoseDetector.draw_bar(image, angle=angle, percentage=percentage)
+#         if is_display_feedback:
+#             correct_reps, direction = display_feedback(image, percentage, correct_reps, direction)
+#         else:
+#             put_text(image, str(int(percentage)) + "%", (10, 50), cv2.FONT_HERSHEY_PLAIN, 2, COLORS['red'], 2)
+#
+#     current_time = time.time()
+#     fps = 1 / (current_time - previous_time)
+#
+#     previous_time = current_time
+#     # put_text(image, f'FPS: {int(fps)}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, COLORS['red'], 2)
+#
+#     return correct_reps, direction, previous_time
+#
+#
+# # test function
+# def process_video(video_path: str) -> None:
+#     cv2.namedWindow(f'Test {video_path}', cv2.WINDOW_NORMAL)
+#     cap = cv2.VideoCapture(video_path)
+#     detector = PoseDetector()
+#     previous_time = 0
+#     # todo: get 30 frames per second more accurately
+#     cap.set(cv2.CAP_PROP_FPS, FPS)
+#     correct_reps, incorrect_reps = 0, 0
+#     direction = 0  # 0 - down, 1 - up
+#     landmark_list = []  # list of landmarks
+#
+#     while cap.isOpened():
+#         success, image = cap.read()
+#         if not success:
+#             print(EMPTY_CAMERA_FRAME)
+#             break
+#         correct_reps, direction, previous_time = process_frame(image, detector, landmark_list, previous_time,
+#                                                                correct_reps, direction)
+#         cv2.resizeWindow(f'Test {video_path}', 800, 800)
+#
+#         cv2.imshow(f'Test {video_path}', image)
+#         # Wait for the user to press EXIT_KEY to exit the program
+#         if cv2.waitKey(1) & 0xFF == EXIT_KEY:  # change to 0 for pause
+#             break
+#
+#     cap.release()
+#     cv2.destroyAllWindows()
 
-
-def display_feedback(image: np.ndarray, percentage: float, correct_reps: float, direction: int) -> tuple[float, int]:
-    correct_reps, direction = check_progress(percentage, correct_reps, direction)
-    # give feedback
-    cv2.putText(image, f'{int(correct_reps)}', (10, 100), cv2.FONT_HERSHEY_PLAIN, 2, COLORS['green'], 2)
-    #     give guide fidback to correct the pose
-    if percentage == 0:
-        cv2.putText(image, 'Move your arm up', (10, 100), cv2.FONT_HERSHEY_PLAIN, 2, COLORS['red'], 2)
-    elif percentage == 100:
-        cv2.putText(image, 'Move your arm down', (10, 100), cv2.FONT_HERSHEY_PLAIN, 2, COLORS['red'], 2)
-
-    return correct_reps, direction
-
-
-def process_frame(image: np.ndarray, detector: PoseDetector, landmark_list: list[LANDMARK_VARIABLES],
-                  previous_time: float, correct_reps: float
-                  , direction: int, is_display_feedback=True) -> tuple[float, int, float]:
-    result = detector.detect_pose(image, is_draw=False)
-    landmark_list = detector.get_position(image, result.pose_landmarks, is_draw=False, landmark_list=landmark_list)
-
-    if len(landmark_list) != 0:
-        # test left knee
-        angle = detector.get_angle(image, 11, 13, 15, landmark_list)
-        percentage = np.interp(angle, (210, 310), (0, 100))
-        PoseDetector.draw_bar(image, angle=angle, percentage=percentage)
-        if is_display_feedback:
-            correct_reps, direction = display_feedback(image, percentage, correct_reps, direction)
-        else:
-            put_text(image, str(int(percentage)) + "%", (10, 50), cv2.FONT_HERSHEY_PLAIN, 2, COLORS['red'], 2)
-
-    current_time = time.time()
-    fps = 1 / (current_time - previous_time)
-
-    previous_time = current_time
-    put_text(image, f'FPS: {int(fps)}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, COLORS['red'], 2)
-
-    return correct_reps, direction, previous_time
-
-
-# test function
-# todo move it to WeightLeft class
-def process_video(video_path: str) -> None:
-    cv2.namedWindow(f'Test {video_path}', cv2.WINDOW_NORMAL)
-    cap = cv2.VideoCapture(video_path)
-    detector = PoseDetector()
-    previous_time = 0
-    # todo: get 30 frames per second more accurately
-    cap.set(cv2.CAP_PROP_FPS, FPS)
-    correct_reps, incorrect_reps = 0, 0
-    direction = 0  # 0 - down, 1 - up
-    landmark_list = []  # list of landmarks
-
-    while cap.isOpened():
-        success, image = cap.read()
-        if not success:
-            print(EMPTY_CAMERA_FRAME)
-            break
-        correct_reps, direction, previous_time = process_frame(image, detector, landmark_list, previous_time,
-                                                               correct_reps, direction)
-        cv2.resizeWindow(f'Test {video_path}', 800, 800)
-
-        cv2.imshow(f'Test {video_path}', image)
-        # Wait for the user to press EXIT_KEY to exit the program
-        if cv2.waitKey(1) & 0xFF == EXIT_KEY:  # change to 0 for pause
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
-
-def main():
-    video_path = 'videos/test.mp4'
-    process_video(video_path)
-
-
-if __name__ == '__main__':
-    main()
+#
+# def main():
+#     video_path = 'videos/test.mp4'
+#     process_video(video_path)
+#
+#
+# if __name__ == '__main__':
+#     main()
